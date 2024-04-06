@@ -14,16 +14,34 @@ class _mainpageState extends State<mainpage> {
   bool _showSlider = false;
   bool _isPowerOn = false;
 
+  void _onItemTapped(int index) {
+    setState(() {});
+
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Statistic()),
+      );
+    } else if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => mainpage()),
+      );
+    }
+  }
+
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(178, 209, 238, 1),
       bottomNavigationBar: CurvedNavigationBar(
-        /*index: _selectedIndex,*/
+        index: _currentIndex,
         backgroundColor: Colors.transparent,
         color: Colors.white,
         animationDuration: Duration(milliseconds: 300),
-        /*onTap: _onItemTapped,*/
+        onTap: _onItemTapped,
         items: const [
           Icon(
             Icons.home,
