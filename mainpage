@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/statistic.dart';
 
 class mainpage extends StatefulWidget {
   const mainpage({Key? key}) : super(key: key);
@@ -13,52 +11,35 @@ class mainpage extends StatefulWidget {
 class _mainpageState extends State<mainpage> {
   bool _showSlider = false;
   bool _isPowerOn = false;
-
-  void _onItemTapped(int index) {
-    setState(() {});
-
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Statistic()),
-      );
-    } else if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => mainpage()),
-      );
-    }
-  }
-
-  int _currentIndex = 0;
+  int number = 22;
 
   @override
   Widget build(BuildContext context) {
+    Color getColor() {
+      if (number > 300) {
+        return Colors.red.shade900;
+      } else if (number > 200) {
+        return Colors.purple;
+      } else if (number > 150) {
+        return Colors.red;
+      } else if (number > 100) {
+        return Colors.orange;
+      } else if (number > 50) {
+        return Colors.yellow;
+      } else if (number > 0) {
+        return Colors.green;
+      } else {
+        return const Color.fromRGBO(160, 199, 235, 1);
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color.fromRGBO(178, 209, 238, 1),
-      bottomNavigationBar: CurvedNavigationBar(
-        index: _currentIndex,
-        backgroundColor: Colors.transparent,
-        color: Colors.white,
-        animationDuration: Duration(milliseconds: 300),
-        onTap: _onItemTapped,
-        items: const [
-          Icon(
-            Icons.home,
-            color: Color.fromRGBO(178, 209, 238, 1),
-            size: 50,
-          ),
-          Icon(
-            Icons.bar_chart,
-            color: Color.fromRGBO(178, 209, 238, 1),
-            size: 50,
-          ),
-        ],
-      ),
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: const Color.fromRGBO(255, 255, 255, 255),
         centerTitle: true,
+        automaticallyImplyLeading: false,
         title: const Text(
           "Home",
           style: TextStyle(fontFamily: "Raleway"),
@@ -72,10 +53,10 @@ class _mainpageState extends State<mainpage> {
               width: 280,
               height: 280,
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color.fromRGBO(160, 199, 235, 1),
+              decoration: BoxDecoration(
+                color: getColor(),
                 shape: BoxShape.circle,
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Color.fromRGBO(0, 0, 0, 0.4),
                     blurRadius: 2.0,
@@ -83,38 +64,59 @@ class _mainpageState extends State<mainpage> {
                   ),
                 ],
               ),
-              child: Container(
-                padding: const EdgeInsets.only(top: 64),
-                decoration: const BoxDecoration(
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Column(
-                  children: [
-                    Text(
-                      '50',
-                      style: TextStyle(
-                        color: Color.fromRGBO(160, 199, 235, 1),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 100,
-                        height: 0.95,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black12,
-                            offset: Offset(-2, -2),
-                            blurRadius: 5,
+              child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Indeks Kualitas Udara'),
+                        content: Image.asset('assets/AQI.png'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('Tutup'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ],
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.only(top: 64),
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(255, 255, 255, 1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '${number}',
+                        style: TextStyle(
+                          color: getColor(),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 100,
+                          height: 0.95,
+                          shadows: const [
+                            Shadow(
+                              color: Colors.black12,
+                              offset: Offset(-2, -2),
+                              blurRadius: 5,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      'PM2.5',
-                      style: TextStyle(
-                        color: Color.fromRGBO(160, 199, 235, 1),
-                        fontSize: 24,
+                      const Text(
+                        'PM2.5',
+                        style: TextStyle(
+                          color: Color.fromRGBO(160, 199, 235, 1),
+                          fontSize: 24,
+                        ),
                       ),
-                    )
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
