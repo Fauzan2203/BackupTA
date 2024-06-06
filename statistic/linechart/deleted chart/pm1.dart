@@ -1,0 +1,198 @@
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'dart:async';
+
+class PM1 extends StatefulWidget {
+  const PM1({Key? key}) : super(key: key);
+
+  @override
+  State<PM1> createState() => _PM1State();
+}
+
+class _PM1State extends State<PM1> {
+  Timer? _timer;
+  DateTime _currentTime = DateTime.now();
+  List<FlSpot> _spots = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTime = DateTime.now();
+    _spots = generateInitialSpots();
+    _timer = Timer.periodic(const Duration(minutes: 10), _updateChart);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  List<FlSpot> generateInitialSpots() {
+    // Generate initial spots for testing, for example purposes
+    return [
+      FlSpot(0, 200),
+      FlSpot(10, 140),
+      FlSpot(20, 303),
+      FlSpot(30, 401),
+      FlSpot(40, 44),
+      FlSpot(50, 309),
+      FlSpot(60, 470),
+    ];
+  }
+
+  void _updateChart(Timer timer) {
+    setState(() {
+      _currentTime = DateTime.now();
+      // Generate a new spot for demonstration
+      // Here you can replace this logic with real data fetching
+      final newSpot = FlSpot(_spots.length * 10.0, _getRandomValue());
+      if (_spots.length >= 7) {
+        _spots
+            .removeAt(0); // Maintain a maximum number of spots (7 in this case)
+      }
+      _spots.add(newSpot);
+    });
+  }
+
+  double _getRandomValue() {
+    // Replace this with real data fetching logic
+    return (100 +
+            (400 * (0.5 - (new DateTime.now().millisecond % 1000) / 1000)))
+        .toDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: const Color.fromRGBO(178, 209, 238, 1),
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            margin: const EdgeInsets.only(left: 20, right: 20),
+            padding: const EdgeInsets.only(left: 20, top: 20),
+            height: 400,
+            width: 400,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(50),
+                bottomRight: Radius.circular(50),
+              ), // Border container
+            ),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: LineChart(
+                LineChartData(
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: _spots,
+                      isCurved: true,
+                      dotData: const FlDotData(show: true),
+                      color: Colors.blue,
+                      barWidth: 5,
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: Colors.blue.withOpacity(0.3),
+                      ),
+                    ),
+                  ],
+                  minX: 0,
+                  maxX: 60,
+                  minY: 0,
+                  maxY: 500,
+                  borderData: FlBorderData(
+                    show: true,
+                    border: const Border(
+                      bottom: BorderSide(color: Colors.black),
+                      right: BorderSide(color: Colors.black),
+                      top: BorderSide(color: Colors.transparent),
+                      left: BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      axisNameWidget: const Text('Time'),
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 50,
+                        getTitlesWidget: (value, meta) {
+                          if (value % 10 == 0) {
+                            final DateTime pastTime = _currentTime.subtract(
+                              Duration(minutes: 60 - value.toInt()),
+                            );
+                            final String formattedTime =
+                                '${pastTime.hour.toString().padLeft(2, '0')}:${pastTime.minute.toString().padLeft(2, '0')}';
+                            return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              space: 4.0,
+                              child: Text(formattedTime),
+                            );
+                          }
+                          return Container();
+                        },
+                      ),
+                    ),
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        getTitlesWidget: (value, meta) {
+                          String text = '';
+                          switch (value.toInt()) {
+                            case 1:
+                              text = '1';
+                              break;
+                            case 50:
+                              text = '50';
+                              break;
+                            case 100:
+                              text = '100';
+                              break;
+                            case 150:
+                              text = '150';
+                              break;
+                            case 200:
+                              text = '200';
+                              break;
+                            case 250:
+                              text = '250';
+                              break;
+                            case 300:
+                              text = '300';
+                              break;
+                            case 350:
+                              text = '350';
+                              break;
+                            case 400:
+                              text = '400';
+                              break;
+                            case 450:
+                              text = '450';
+                              break;
+                            case 500:
+                              text = '500';
+                              break;
+                          }
+                          return Text(text);
+                        },
+                      ),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: false,
+                      ),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
