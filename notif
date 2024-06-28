@@ -1,0 +1,40 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
+
+class FirebaseApi {
+  //buat instance firebase messaging
+  final _firebaseMessaging = FirebaseMessaging.instance;
+
+  //fungsi untuk inisialisasi notifnya
+  Future<void> initNotifications() async {
+    //request permission dari user
+    await _firebaseMessaging.requestPermission();
+    //ambil token fCM buat device ini
+    final fCMToken = await _firebaseMessaging.getToken();
+    //print tokennya (normally you would send this to your server)
+    print('Token: $fCMToken');
+
+    initPushNotification();
+  }
+
+  //fungsi untuk handle menerima messages
+  void handleMessage(RemoteMessage? message) {
+    //jika messagenya null
+    if (message == null) return;
+
+    //
+    navigatorKey.currentState?.pushNamed(
+      '/mainpage',
+      arguments: message,
+    );
+  }
+
+  //fungsi untuk inisialisasi foreground dan background setting
+  Future initPushNotification() async {
+    //menghandle notif jika app berhenti
+    FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
+    //
+    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
+  }
+}
