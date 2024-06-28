@@ -13,7 +13,7 @@ class _mainpageState extends State<mainpage> {
   bool _isPowerOn = false;
   bool _isAutoMode = false;
   int number = 0;
-  double _sliderValue = 0.0;
+  double _sliderValue = 1.0;
 
   @override
   void initState() {
@@ -385,192 +385,105 @@ class _mainpageState extends State<mainpage> {
               ),
               SizedBox(
                 width: 400,
-                height: 156,
+                height: 140,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (!_isPowerOn) {
-                          return; // Do nothing if power is off
-                        }
-                        setState(() {
-                          _isAutoMode = !_isAutoMode;
-                          _showSlider = false;
-                        });
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            if (!_isPowerOn) {
+                              return; // Do nothing if power is off
+                            }
+                            setState(() {
+                              _isAutoMode = !_isAutoMode;
+                              _showSlider =
+                                  !_isAutoMode; // Toggle slider visibility
+                            });
 
-                        FirebaseFirestore.instance
-                            .collection('EspData')
-                            .doc('Sent From Mobile')
-                            .update({'autoMode': _isAutoMode})
-                            .then((_) => print('Auto mode update successfully'))
-                            .catchError((error) =>
-                                print('Failed to update auto mode : $error'));
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(milliseconds: 100),
-                        transform: _isAutoMode
-                            ? Matrix4.translationValues(0, 3, 0)
-                            : Matrix4.translationValues(0, 0, 0),
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _isAutoMode
-                                ? Color.fromRGBO(178, 209, 238, 1)
-                                : Colors.white,
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 5),
-                              BoxShadow(
-                                  color: Colors.white,
-                                  offset: Offset(-1, -1),
-                                  blurRadius: 5),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              'A',
-                              style: TextStyle(
+                            FirebaseFirestore.instance
+                                .collection('EspData')
+                                .doc('Sent From Mobile')
+                                .update({'autoMode': _isAutoMode})
+                                .then((_) => print('Mode updated successfully'))
+                                .catchError((error) =>
+                                    print('Failed to update mode: $error'));
+                          },
+                          child: AnimatedContainer(
+                            duration: Duration(milliseconds: 100),
+                            transform: _isAutoMode
+                                ? Matrix4.translationValues(0, 3, 0)
+                                : Matrix4.translationValues(0, 0, 0),
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
                                 color: _isAutoMode
-                                    ? Colors.white
-                                    : Color.fromRGBO(178, 209, 238, 1),
-                                fontSize: 55,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                                decorationColor: _isAutoMode
-                                    ? Colors.white
-                                    : Color.fromRGBO(178, 209, 238, 1),
+                                    ? Color.fromRGBO(178, 209, 238, 1)
+                                    : Colors.white,
+                                boxShadow: const [
+                                  BoxShadow(
+                                      color: Colors.grey,
+                                      offset: Offset(2, 2),
+                                      blurRadius: 5),
+                                  BoxShadow(
+                                      color: Colors.white,
+                                      offset: Offset(-1, -1),
+                                      blurRadius: 5),
+                                ],
+                              ),
+                              child: Center(
+                                child: _isAutoMode
+                                    ? const Text(
+                                        'A',
+                                        style: TextStyle(
+                                          fontSize: 60,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.touch_app_sharp,
+                                        size: 60,
+                                        color: Color.fromRGBO(178, 209, 238, 1),
+                                      ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                          'Mode',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
                     ),
-                    GestureDetector(
-                      onTap: () async {
-                        setState(() {
-                          _isPowerOn = !_isPowerOn;
-                        });
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              _isPowerOn = !_isPowerOn;
+                            });
 
-                        // Update the power state in Firestore
-                        FirebaseFirestore.instance
-                            .collection('EspData')
-                            .doc('Sent From Mobile')
-                            .update({'powerState': _isPowerOn})
-                            .then((_) =>
-                                print('Power state updated successfully'))
-                            .catchError((error) =>
-                                print('Failed to update power state: $error'));
-
-                        // If power is turned on, fetch AutoMode value from Firestore
-                        if (_isPowerOn) {
-                          try {
-                            DocumentSnapshot document = await FirebaseFirestore
-                                .instance
+                            // Update the power state in Firestore
+                            FirebaseFirestore.instance
                                 .collection('EspData')
                                 .doc('Sent From Mobile')
-                                .get();
+                                .update({'powerState': _isPowerOn})
+                                .then((_) =>
+                                    print('Power state updated successfully'))
+                                .catchError((error) => print(
+                                    'Failed to update power state: $error'));
 
-                            var data = document
-                                .data(); // Get the data from the document
-                            if (data != null) {
-                              // Check if the data is not null
-                              Map<String, dynamic> dataMap = data as Map<String,
-                                  dynamic>; // Cast to Map<String, dynamic>
-                              bool autoMode = dataMap['autoMode'] ??
-                                  false; // Safely access 'autoMode' with null-aware operator
-
-                              setState(() {
-                                _isAutoMode = autoMode;
-                                _showSlider =
-                                    !autoMode; // If autoMode is true, showSlider should be false, and vice versa
-                              });
-                            } else {
-                              print(
-                                  'No data found in the document'); // Handle the case where data is null
-                            }
-                          } catch (error) {
-                            print(
-                                'Failed to fetch AutoMode value: $error'); // Handle any errors that occur during the fetch
-                          }
-                        } else {
-                          // Reset button state when power is turned off
-                          setState(() {
-                            _isAutoMode = false;
-                            _showSlider = false;
-                          });
-                        }
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(milliseconds: 100),
-                        transform: _isPowerOn
-                            ? Matrix4.translationValues(0, 3, 0)
-                            : Matrix4.translationValues(0, 0, 0),
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          margin: const EdgeInsets.only(top: 60),
-                          decoration: BoxDecoration(
-                            color: _isPowerOn
-                                ? Color.fromRGBO(178, 209, 238, 1)
-                                : Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 5),
-                              BoxShadow(
-                                  color: Colors.white,
-                                  offset: Offset(-1, -1),
-                                  blurRadius: 5),
-                            ],
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.power_settings_new_sharp,
-                              size: 80,
-                              color: _isPowerOn
-                                  ? Colors.white
-                                  : Color.fromRGBO(178, 209, 238, 1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: _showSlider
-                            ? Color.fromRGBO(178, 209, 238, 1)
-                            : Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(
-                              color: Colors.grey,
-                              offset: Offset(2, 2),
-                              blurRadius: 5),
-                          BoxShadow(
-                              color: Colors.white,
-                              offset: Offset(-1, -1),
-                              blurRadius: 5),
-                        ],
-                      ),
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: () async {
-                            if (!_isPowerOn) {
-                              return; // Do nothing if power is off
-                            }
-
-                            if (!_showSlider) {
-                              // Fetch slider value from Firestore
+                            // If power is turned on, fetch AutoMode value from Firestore
+                            if (_isPowerOn) {
                               try {
                                 DocumentSnapshot document =
                                     await FirebaseFirestore.instance
@@ -585,13 +498,13 @@ class _mainpageState extends State<mainpage> {
                                   Map<String, dynamic> dataMap = data as Map<
                                       String,
                                       dynamic>; // Cast to Map<String, dynamic>
-                                  double storedSliderValue = dataMap[
-                                              'sliderValue']
-                                          ?.toDouble() ??
-                                      0.0; // Safely access 'sliderValue' with null-aware operator
+                                  bool autoMode = dataMap['autoMode'] ??
+                                      false; // Safely access 'autoMode' with null-aware operator
 
                                   setState(() {
-                                    _sliderValue = storedSliderValue;
+                                    _isAutoMode = autoMode;
+                                    _showSlider =
+                                        !autoMode; // If autoMode is true, showSlider should be false, and vice versa
                                   });
                                 } else {
                                   print(
@@ -599,67 +512,82 @@ class _mainpageState extends State<mainpage> {
                                 }
                               } catch (error) {
                                 print(
-                                    'Failed to fetch slider value: $error'); // Handle any errors that occur during the fetch
+                                    'Failed to fetch AutoMode value: $error'); // Handle any errors that occur during the fetch
                               }
                             }
-
-                            setState(() {
-                              _showSlider = !_showSlider;
-                              _isAutoMode = false;
-                            });
-
-                            FirebaseFirestore.instance
-                                .collection('EspData')
-                                .doc('Sent From Mobile')
-                                .update({'autoMode': false})
-                                .then((_) =>
-                                    print('Manual mode updated successfully'))
-                                .catchError((error) => print(
-                                    'Failed to update manual mode: $error'));
                           },
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 100),
-                            transform: _showSlider
+                            transform: _isPowerOn
                                 ? Matrix4.translationValues(0, 3, 0)
                                 : Matrix4.translationValues(0, 0, 0),
-                            child: Icon(
-                              Icons.touch_app_sharp,
-                              size: 60,
-                              color: _showSlider
-                                  ? Colors.white
-                                  : Color.fromRGBO(178, 209, 238, 1),
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              //margin: const EdgeInsets.only(top: 60),
+                              decoration: BoxDecoration(
+                                color: _isPowerOn
+                                    ? Color.fromRGBO(178, 209, 238, 1)
+                                    : Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: const [
+                                  BoxShadow(
+                                      color: Colors.grey,
+                                      offset: Offset(2, 2),
+                                      blurRadius: 5),
+                                  BoxShadow(
+                                      color: Colors.white,
+                                      offset: Offset(-1, -1),
+                                      blurRadius: 5),
+                                ],
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.power_settings_new_sharp,
+                                  size: 80,
+                                  color: _isPowerOn
+                                      ? Colors.white
+                                      : Color.fromRGBO(178, 209, 238, 1),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                          'Power',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
               if (_showSlider)
-                SizedBox(
-                  width: 400,
-                  height: 50,
+                Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SliderWidget(
-                        initialSliderValue: _sliderValue,
-                        onSliderValueChanged: (double value) {
-                          setState(() {
-                            _sliderValue = value;
-                          });
+                      if (_isPowerOn)
+                        SliderWidget(
+                          initialSliderValue: _sliderValue,
+                          onSliderValueChanged: (double value) {
+                            setState(() {
+                              _sliderValue = value;
+                            });
 
-                          FirebaseFirestore.instance
-                              .collection('EspData')
-                              .doc('Sent From Mobile')
-                              .update({'sliderValue': value.round()})
-                              .then((_) =>
-                                  print('Slider value updated successfully'))
-                              .catchError((error) => print(
-                                  'Failed to update slider value: $error'));
-                        },
-                      ),
+                            FirebaseFirestore.instance
+                                .collection('EspData')
+                                .doc('Sent From Mobile')
+                                .update({'sliderValue': value.round()})
+                                .then((_) =>
+                                    print('Slider value updated successfully'))
+                                .catchError((error) => print(
+                                    'Failed to update slider value: $error'));
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -713,10 +641,27 @@ class _SliderWidgetState extends State<SliderWidget> {
             });
             widget.onSliderValueChanged(value);
           },
-          min: 0.0,
-          max: 100.0,
-          divisions: 100,
+          min: 1.0,
+          max: 4.0,
+          divisions: 3,
+          label: _sliderValue.toString(),
         ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Low',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                'High',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        )
       ],
     );
   }
