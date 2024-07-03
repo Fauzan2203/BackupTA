@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/api/firebase_api.dart';
-import 'package:flutter_application_1/mainpage.dart';
-import 'package:flutter_application_1/routes.dart';
+import 'package:flutter_application_1/statistic/chart_data_provider.dart';
+import 'package:provider/provider.dart';
+import 'routes.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -19,21 +18,32 @@ Future main() async {
             databaseURL:
                 "https://ta-air-purifier-default-rtdb.asia-southeast1.firebasedatabase.app",
             storageBucket: "ta-air-purifier.appspot.com"));
-    await FirebaseApi().initNotifications();
   } else {
     await Firebase.initializeApp();
   }
 
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    onGenerateRoute: RouteGenerator.generateRoute,
-    navigatorKey: navigatorKey,
-    routes: {
-      '/mainpage': (context) => const mainpage(),
-    },
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ChartDataProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 Future initialization(BuildContext? context) async {
   await Future.delayed(const Duration(seconds: 2));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      onGenerateRoute: RouteGenerator.generateRoute,
+    );
+  }
 }
